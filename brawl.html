@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>荒野亂鬥 - 測試商城</title>
+    <title>荒野亂鬥商城</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -91,17 +91,17 @@
 <body>
 
 <div class="container">
-    <h1>荒野亂鬥 特約商城 (測試版)</h1>
+    <h1>荒野亂鬥 特約商城</h1>
     
     <div id="store-items">
         </div>
 
     <div class="checkout-section">
         <div class="total-price">總計: NT$ <span id="total-amount">0</span></div>
-        <button onclick="checkout()">模擬信用卡結帳</button>
+        <button onclick="checkout()">信用卡結帳</button>
         <div class="disclaimer">
             * 每個商品單次最多限購 5 個。<br>
-            * 本網站僅供靜態測試，不會收集任何資料，點擊結帳將模擬成功。
+            * 使用本網站即同意本網站蒐集您的資料。
         </div>
     </div>
 </div>
@@ -197,7 +197,7 @@
         }
 
         let orderSummary = orderDetails.map(item => `${item.name} x ${item.quantity}`).join("\\n");
-        alert(`信用卡測試付款成功！\\n\\n您的訂單內容：\\n${orderSummary}\\n\\n總額: NT$ ${totalAmount}\\n\\n(註：此為純 HTML 靜態測試頁面，訂單未傳送至任何伺服器)`);
+        alert(`信用卡付款成功！\\n\\n您的訂單內容：\\n${orderSummary}\\n\\n總額: NT$ ${totalAmount}\\n\\n(註：你真的以為我這麼厲害，可以不再SuperCell公司發現下蒐集你的資料又違規帶除代打嗎？自己想一想吧！)`);
         
         // 結帳後清空購物車
         inputs.forEach(input => input.value = 0);
