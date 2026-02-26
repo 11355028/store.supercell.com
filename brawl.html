@@ -1,9 +1,3 @@
-from flask import Flask, render_template_string, request, jsonify
-
-app = Flask(__name__)
-
-# 單頁 HTML 模板 (包含 CSS 與 JavaScript)
-HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -107,7 +101,7 @@ HTML_TEMPLATE = """
         <button onclick="checkout()">模擬信用卡結帳</button>
         <div class="disclaimer">
             * 每個商品單次最多限購 5 個。<br>
-            * 本網站僅供測試，不收集真實信用卡資料，點擊結帳將模擬成功。
+            * 本網站僅供靜態測試，不會收集任何資料，點擊結帳將模擬成功。
         </div>
     </div>
 </div>
@@ -181,16 +175,17 @@ HTML_TEMPLATE = """
         document.getElementById('total-amount').innerText = total;
     }
 
-    // 送出結帳
+    // 送出結帳 (純靜態模擬)
     function checkout() {
         let orderDetails = [];
         const inputs = document.querySelectorAll('input[type="number"]');
+        let totalAmount = document.getElementById('total-amount').innerText;
+
         inputs.forEach(input => {
             let qty = parseInt(input.value);
             if (qty > 0) {
                 orderDetails.push({
                     name: input.getAttribute('data-name'),
-                    price: input.getAttribute('data-price'),
                     quantity: qty
                 });
             }
@@ -201,50 +196,14 @@ HTML_TEMPLATE = """
             return;
         }
 
-        // 發送 POST 請求至 Python 後端
-        fetch('/checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ items: orderDetails })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message + "\\n\\n訂單總額: NT$" + document.getElementById('total-amount').innerText);
-            // 結帳後清空購物車
-            inputs.forEach(input => input.value = 0);
-            calculateTotal();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("結帳系統發生錯誤！");
-        });
+        let orderSummary = orderDetails.map(item => `${item.name} x ${item.quantity}`).join("\\n");
+        alert(`信用卡測試付款成功！\\n\\n您的訂單內容：\\n${orderSummary}\\n\\n總額: NT$ ${totalAmount}\\n\\n(註：此為純 HTML 靜態測試頁面，訂單未傳送至任何伺服器)`);
+        
+        // 結帳後清空購物車
+        inputs.forEach(input => input.value = 0);
+        calculateTotal();
     }
 </script>
 
 </body>
 </html>
-"""
-
-@app.route('/')
-def index():
-    return render_template_string(HTML_TEMPLATE)
-
-@app.route('/checkout', methods=['POST'])
-def process_checkout():
-    data = request.json
-    # 在終端機印出訂單資訊供測試確認
-    print("--- 收到新訂單 ---")
-    for item in data.get('items', []):
-        print(f"商品: {item['name']}, 數量: {item['quantity']}, 單價: {item['price']}")
-    print("------------------")
-    
-    return jsonify({
-        "status": "success",
-        "message": "信用卡測試付款成功！訂單已傳送至後端。"
-    })
-
-if __name__ == '__main__':
-    # 啟動測試伺服器
-    app.run(host='0.0.0.0', port=5000, debug=True)
