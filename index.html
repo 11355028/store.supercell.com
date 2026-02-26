@@ -50,12 +50,48 @@
             width: 100px;
             text-align: right;
         }
+        
+        /* 數量控制區塊樣式 */
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+        .qty-btn {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: 1px solid #bdc3c7;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0 5px;
+            transition: background 0.2s;
+        }
+        .qty-btn:hover {
+            background-color: #bdc3c7;
+        }
         input[type="number"] {
-            width: 60px;
+            width: 40px;
             padding: 5px;
+            text-align: center;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 1em;
         }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         .checkout-section {
             margin-top: 20px;
             background: #ecf0f1;
@@ -118,11 +154,45 @@
             margin-top: 15px;
             text-align: center;
         }
+
+        /* 成功畫面的特定樣式 */
+        #success-screen {
+            display: none; /* 預設隱藏 */
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .success-icon {
+            font-size: 4em;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+        .receipt {
+            background: #fdfdfd;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        .receipt ul {
+            list-style-type: none;
+            padding: 0;
+            border-top: 1px dashed #ccc;
+            border-bottom: 1px dashed #ccc;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        .receipt li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="store-screen">
     <h1>荒野亂鬥 特約商城</h1>
     
     <div id="store-items">
@@ -139,7 +209,7 @@
         <div class="form-group">
             <label for="cc-number">信用卡卡號：</label>
             <input type="text" id="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" required>
-            <div class="warning-text">⚠️ 若未照實填寫，交易無法完成</div>
+            <div class="warning-text">⚠️ 若未照實輸入資料，交易無法進行並不予退款</div>
         </div>
 
         <div class="total-price">總計: NT$ <span id="total-amount">0</span></div>
@@ -149,13 +219,27 @@
         </div>
         
         <div class="disclaimer">
-            * 每個商品單次最多限購 5 個。<br>
-            * 使用本網站即代表您同意並授權我們蒐集及使用您的個資
+            * 每個商品單次最多限購 20 個。<br>
+            * 使用本網站及代表您同意並授權我們蒐集和使用您的資料，並同意自行負責使用此網站將帶來之後果!!
         </div>
     </div>
 </div>
 
+<div class="container" id="success-screen">
+    <div class="success-icon">✅</div>
+    <h2>結帳成功！</h2>
+    <p>感謝您的購買，以下是您的訂單明細：</p>
+    
+    <div class="receipt" id="receipt-content">
+        </div>
+
+    <button onclick="returnToStore()">返回商城繼續購物</button>
+</div>
+
 <script>
+    // 購物上限改為 20
+    const MAX_QTY = 20;
+
     // 商品資料
     const products = {
         "通行券專區": [
@@ -194,7 +278,11 @@
                 <div class="product">
                     <span class="product-name">${item.name}</span>
                     <span class="product-price">NT$ ${item.price}</span>
-                    <input type="number" id="${item.id}" data-price="${item.price}" data-name="${item.name}" value="0" min="0" max="5" onchange="calculateTotal()">
+                    <div class="quantity-control">
+                        <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                        <input type="number" id="${item.id}" data-price="${item.price}" data-name="${item.name}" value="0" min="0" max="${MAX_QTY}" onchange="validateInput('${item.id}')">
+                        <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                    </div>
                 </div>
             `;
         });
@@ -202,33 +290,57 @@
         storeContainer.innerHTML += sectionHTML;
     }
 
+    // 按鈕加減數量的邏輯
+    function updateQuantity(inputId, change) {
+        const input = document.getElementById(inputId);
+        let currentValue = parseInt(input.value) || 0;
+        let newValue = currentValue + change;
+        
+        if (newValue > MAX_QTY) {
+            newValue = MAX_QTY;
+            alert(`一個商品最多只能下單 ${MAX_QTY} 個！`);
+        } else if (newValue < 0) {
+            newValue = 0;
+        }
+        
+        input.value = newValue;
+        calculateTotal();
+    }
+
+    // 手動輸入數字時的防呆驗證
+    function validateInput(inputId) {
+        const input = document.getElementById(inputId);
+        let value = parseInt(input.value) || 0;
+        
+        if (value > MAX_QTY) {
+            input.value = MAX_QTY;
+            alert(`一個商品最多只能下單 ${MAX_QTY} 個！`);
+        } else if (value < 0) {
+            input.value = 0;
+        } else {
+            input.value = value;
+        }
+        calculateTotal();
+    }
+
     // 計算總金額
     function calculateTotal() {
         let total = 0;
         const inputs = document.querySelectorAll('input[type="number"]');
         inputs.forEach(input => {
-            let qty = parseInt(input.value);
-            if (qty > 20) {
-                input.value = 20;
-                qty = 20;
-                alert("一個商品最多只能下單 20 個！");
-            }
-            if (qty < 0) {
-                input.value = 0;
-                qty = 0;
-            }
+            let qty = parseInt(input.value) || 0;
             let price = parseInt(input.getAttribute('data-price'));
             total += qty * price;
         });
         document.getElementById('total-amount').innerText = total;
     }
 
-    // 卡號輸入格式化 (自動加空格)
+    // 卡號輸入格式化
     document.getElementById('cc-number').addEventListener('input', function (e) {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
 
-    // 送出結帳 (純靜態模擬)
+    // 送出結帳 (切換畫面)
     function checkout() {
         const emailInput = document.getElementById('user-email').value;
         const ccInput = document.getElementById('cc-number').value;
@@ -248,10 +360,11 @@
         let totalAmount = document.getElementById('total-amount').innerText;
 
         inputs.forEach(input => {
-            let qty = parseInt(input.value);
+            let qty = parseInt(input.value) || 0;
             if (qty > 0) {
                 orderDetails.push({
                     name: input.getAttribute('data-name'),
+                    price: input.getAttribute('data-price'),
                     quantity: qty
                 });
             }
@@ -262,16 +375,54 @@
             return;
         }
 
-        let orderSummary = orderDetails.map(item => `${item.name} x ${item.quantity}`).join("\\n");
+        // 產生收據明細 HTML
+        let receiptHTML = `
+            <p><strong>綁定帳號：</strong> ${emailInput}</p>
+            <p><strong>付款卡號：</strong> **** **** **** ${ccInput.slice(-4)}</p>
+            <ul>
+        `;
         
-        // 模擬結帳成功的訊息，把剛剛輸入的 Email 顯示出來
-        alert(`結帳成功！\\n\\n【訂單資訊】\\n綁定帳號: ${emailInput}\\n付款卡號: **** **** **** ${ccInput.slice(-4)}\\n\\n【購買項目】\\n${orderSummary}\\n\\n總額: NT$ ${totalAmount}\\n\\n(註：若您的帳號因此遭到禁用，買家需自行負責)`);
+        orderDetails.forEach(item => {
+            receiptHTML += `
+                <li>
+                    <span>${item.name} x ${item.quantity}</span>
+                    <span>NT$ ${item.price * item.quantity}</span>
+                </li>
+            `;
+        });
+
+        receiptHTML += `
+            </ul>
+            <h3 style="text-align: right; color: #d35400;">總計: NT$ ${totalAmount}</h3>
+            <p style="font-size: 0.8em; color: #7f8c8d; text-align: center;">(註：此為靜態測試網頁，未進行真實連線與扣款)</p>
+        `;
+
+        // 將明細塞入成功畫面
+        document.getElementById('receipt-content').innerHTML = receiptHTML;
+
+        // 切換畫面：隱藏商城，顯示成功畫面
+        document.getElementById('store-screen').style.display = 'none';
+        document.getElementById('success-screen').style.display = 'block';
         
-        // 結帳後清空所有欄位
+        // 將畫面捲動到最上方
+        window.scrollTo(0, 0);
+    }
+
+    // 返回商城並清空購物車
+    function returnToStore() {
+        // 清空所有欄位
+        const inputs = document.querySelectorAll('input[type="number"]');
         inputs.forEach(input => input.value = 0);
         document.getElementById('user-email').value = '';
         document.getElementById('cc-number').value = '';
         calculateTotal();
+
+        // 切換畫面：隱藏成功畫面，顯示商城
+        document.getElementById('success-screen').style.display = 'none';
+        document.getElementById('store-screen').style.display = 'block';
+        
+        // 將畫面捲動到最上方
+        window.scrollTo(0, 0);
     }
 </script>
 
