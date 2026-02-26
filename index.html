@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>荒野亂鬥商城</title>
+    <title>荒野亂鬥 - 特約商城</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -12,7 +12,7 @@
             margin: 0;
             padding: 20px;
         }
-        h1, h2 {
+        h1, h2, h3 {
             text-align: center;
             color: #2c3e50;
         }
@@ -57,16 +57,47 @@
             border-radius: 4px;
         }
         .checkout-section {
-            text-align: center;
             margin-top: 20px;
             background: #ecf0f1;
             padding: 20px;
             border-radius: 10px;
         }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        .form-group input[type="email"],
+        .form-group input[type="text"] {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .warning-text {
+            color: #c0392b;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 5px;
+        }
         .total-price {
             font-size: 1.5em;
             color: #d35400;
             margin-bottom: 15px;
+            text-align: center;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
         }
         button {
             background-color: #27ae60;
@@ -84,7 +115,8 @@
         .disclaimer {
             font-size: 0.85em;
             color: #7f8c8d;
-            margin-top: 10px;
+            margin-top: 15px;
+            text-align: center;
         }
     </style>
 </head>
@@ -97,11 +129,28 @@
         </div>
 
     <div class="checkout-section">
+        <h3>付款與帳號資訊</h3>
+        
+        <div class="form-group">
+            <label for="user-email">SuperCell ID (Gmail)：</label>
+            <input type="email" id="user-email" placeholder="請輸入您的 Gmail 帳號" required>
+        </div>
+
+        <div class="form-group">
+            <label for="cc-number">信用卡卡號：</label>
+            <input type="text" id="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" required>
+            <div class="warning-text">⚠️ 若未照實填寫，交易無法完成</div>
+        </div>
+
         <div class="total-price">總計: NT$ <span id="total-amount">0</span></div>
-        <button onclick="checkout()">信用卡結帳</button>
+        
+        <div class="btn-container">
+            <button onclick="checkout()">確認並結帳</button>
+        </div>
+        
         <div class="disclaimer">
             * 每個商品單次最多限購 5 個。<br>
-            * 使用本網站即同意本網站蒐集您的資料。
+            * 使用本網站即代表您同意並授權我們蒐集及使用您的個資
         </div>
     </div>
 </div>
@@ -159,11 +208,10 @@
         const inputs = document.querySelectorAll('input[type="number"]');
         inputs.forEach(input => {
             let qty = parseInt(input.value);
-            // 強制檢查不能超過 5 個
-            if (qty > 5) {
-                input.value = 5;
-                qty = 5;
-                alert("一個商品最多只能下單 5 個！");
+            if (qty > 20) {
+                input.value = 20;
+                qty = 20;
+                alert("一個商品最多只能下單 20 個！");
             }
             if (qty < 0) {
                 input.value = 0;
@@ -175,8 +223,26 @@
         document.getElementById('total-amount').innerText = total;
     }
 
+    // 卡號輸入格式化 (自動加空格)
+    document.getElementById('cc-number').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+    });
+
     // 送出結帳 (純靜態模擬)
     function checkout() {
+        const emailInput = document.getElementById('user-email').value;
+        const ccInput = document.getElementById('cc-number').value;
+
+        // 簡單的前端驗證
+        if (!emailInput.includes('@')) {
+            alert("請輸入有效的 Gmail 帳號！");
+            return;
+        }
+        if (ccInput.length < 15) {
+            alert("請輸入完整的測試信用卡號碼！");
+            return;
+        }
+
         let orderDetails = [];
         const inputs = document.querySelectorAll('input[type="number"]');
         let totalAmount = document.getElementById('total-amount').innerText;
@@ -197,10 +263,14 @@
         }
 
         let orderSummary = orderDetails.map(item => `${item.name} x ${item.quantity}`).join("\\n");
-        alert(`信用卡付款成功！\\n\\n您的訂單內容：\\n${orderSummary}\\n\\n總額: NT$ ${totalAmount}\\n\\n(註：你真的以為我這麼厲害，可以不再SuperCell公司發現下蒐集你的資料又違規帶除代打嗎？自己想一想吧！)`);
         
-        // 結帳後清空購物車
+        // 模擬結帳成功的訊息，把剛剛輸入的 Email 顯示出來
+        alert(`結帳成功！\\n\\n【訂單資訊】\\n綁定帳號: ${emailInput}\\n付款卡號: **** **** **** ${ccInput.slice(-4)}\\n\\n【購買項目】\\n${orderSummary}\\n\\n總額: NT$ ${totalAmount}\\n\\n(註：若您的帳號因此遭到禁用，買家需自行負責)`);
+        
+        // 結帳後清空所有欄位
         inputs.forEach(input => input.value = 0);
+        document.getElementById('user-email').value = '';
+        document.getElementById('cc-number').value = '';
         calculateTotal();
     }
 </script>
