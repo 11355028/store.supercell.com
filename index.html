@@ -2,428 +2,187 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>荒野亂鬥 - 特約商城</title>
+    <title>三分鐘生存挑戰</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
             margin: 0;
-            padding: 20px;
+            overflow: hidden;
+            background: #1a1a1a;
+            font-family: Arial, sans-serif;
+            cursor: none; /* 隱藏滑鼠 */
         }
-        h1, h2, h3 {
-            text-align: center;
-            color: #2c3e50;
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            pointer-events: none;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        #gameCanvas {
+            display: block;
         }
-        .section {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        .product {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #fdfdfd;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        .product-name {
-            font-weight: bold;
-            flex-grow: 1;
-        }
-        .product-price {
-            color: #e74c3c;
-            margin-right: 20px;
-            font-weight: bold;
-            width: 100px;
-            text-align: right;
-        }
-        
-        /* 數量控制區塊樣式 */
-        .quantity-control {
-            display: flex;
-            align-items: center;
-        }
-        .qty-btn {
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            border: 1px solid #bdc3c7;
-            width: 30px;
-            height: 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.2em;
-            display: flex;
+        /* 全螢幕圖片容器 */
+        #winOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 999;
             justify-content: center;
             align-items: center;
-            padding: 0;
-            margin: 0 5px;
-            transition: background 0.2s;
         }
-        .qty-btn:hover {
-            background-color: #bdc3c7;
-        }
-        input[type="number"] {
-            width: 40px;
-            padding: 5px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-
-        .checkout-section {
-            margin-top: 20px;
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .form-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #34495e;
-        }
-        .form-group input[type="email"],
-        .form-group input[type="text"] {
-            padding: 10px;
-            border: 1px solid #bdc3c7;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-        .warning-text {
-            color: #c0392b;
-            font-size: 0.85em;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 5px;
-        }
-        .total-price {
-            font-size: 1.5em;
-            color: #d35400;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        .btn-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-        button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            font-size: 1.2em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #2ecc71;
-        }
-        .disclaimer {
-            font-size: 0.85em;
-            color: #7f8c8d;
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        /* 成功畫面的特定樣式 */
-        #success-screen {
-            display: none; /* 預設隱藏 */
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .success-icon {
-            font-size: 4em;
-            color: #27ae60;
-            margin-bottom: 10px;
-        }
-        .receipt {
-            background: #fdfdfd;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 500px;
-            margin: 20px auto;
-            text-align: left;
-        }
-        .receipt ul {
-            list-style-type: none;
-            padding: 0;
-            border-top: 1px dashed #ccc;
-            border-bottom: 1px dashed #ccc;
-            padding-top: 15px;
-            padding-bottom: 15px;
-        }
-        .receipt li {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
+        #winOverlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
 <body>
 
-<div class="container" id="store-screen">
-    <h1>荒野亂鬥 特約商城</h1>
-    
-    <div id="store-items">
-        </div>
+<div id="ui">剩餘時間: <span id="timer">180</span>s</div>
+<canvas id="gameCanvas"></canvas>
 
-    <div class="checkout-section">
-        <h3>付款與帳號資訊</h3>
-        
-        <div class="form-group">
-            <label for="user-email">SuperCell ID (Gmail)：</label>
-            <input type="email" id="user-email" placeholder="請輸入您的 Gmail 帳號" required>
-        </div>
-
-        <div class="form-group">
-            <label for="cc-number">信用卡卡號：</label>
-            <input type="text" id="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" required>
-            <div class="warning-text">⚠️ 若未照實輸入資料，交易無法進行並不予退款</div>
-        </div>
-
-        <div class="total-price">總計: NT$ <span id="total-amount">0</span></div>
-        
-        <div class="btn-container">
-            <button onclick="checkout()">確認並結帳</button>
-        </div>
-        
-        <div class="disclaimer">
-            * 每個商品單次最多限購 20 個。<br>
-            * 使用本網站及代表您同意並授權我們蒐集和使用您的資料，並同意自行負責使用此網站將帶來之後果!!
-        </div>
-    </div>
-</div>
-
-<div class="container" id="success-screen">
-    <div class="success-icon">✅</div>
-    <h2>結帳成功！</h2>
-    <p>感謝您的購買，以下是您的訂單明細：</p>
-    
-    <div class="receipt" id="receipt-content">
-        </div>
-
-    <button onclick="returnToStore()">返回商城繼續購物</button>
+<div id="winOverlay">
+    <img src="https://img.sanishtech.com/u/26790a42c2a231ee5118f57c9e97df48.png" alt="恭喜通關">
 </div>
 
 <script>
-    // 購物上限改為 20
-    const MAX_QTY = 20;
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const timerDisplay = document.getElementById('timer');
+    const winOverlay = document.getElementById('winOverlay');
 
-    // 商品資料
-    const products = {
-        "通行券專區": [
-            { id: "p1", name: "亂鬥通行券", price: 290 },
-            { id: "p2", name: "高級通行券", price: 430 },
-            { id: "p3", name: "Pro通行券", price: 780 }
-        ],
-        "寶石專區": [
-            { id: "g1", name: "30寶石", price: 70 },
-            { id: "g2", name: "80寶石", price: 170 },
-            { id: "g3", name: "170寶石", price: 330 },
-            { id: "g4", name: "360寶石", price: 670 },
-            { id: "g5", name: "950寶石", price: 1690 },
-            { id: "g6", name: "2000寶石", price: 3290 }
-        ],
-        "代打專區": [
-            { id: "b1", name: "總盃100", price: 250 },
-            { id: "b2", name: "總盃500", price: 1250 },
-            { id: "b3", name: "總盃1000", price: 2400 },
-            { id: "b4", name: "單角100", price: 600 },
-            { id: "b5", name: "單角200", price: 1100 },
-            { id: "b6", name: "單角500", price: 1750 },
-            { id: "b7", name: "單角衝巔峰威望一", price: 2250 },
-            { id: "b8", name: "單角衝巔峰威望二 (若無1000盃則衝至威望一)", price: 2500 },
-            { id: "b9", name: "單角衝巔峰威望三以上 (未達威望二則衝至下個里程碑)", price: 3000 }
-        ]
-    };
+    let gameActive = true;
+    let timeLeft = 180;
+    let particles = [];
+    let player = { x: 0, y: 0, radius: 10 };
 
-    const storeContainer = document.getElementById('store-items');
-    
-    // 渲染商品列表
-    for (const [category, items] of Object.entries(products)) {
-        let sectionHTML = `<div class="section"><h2>${category}</h2>`;
-        items.forEach(item => {
-            sectionHTML += `
-                <div class="product">
-                    <span class="product-name">${item.name}</span>
-                    <span class="product-price">NT$ ${item.price}</span>
-                    <div class="quantity-control">
-                        <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-                        <input type="number" id="${item.id}" data-price="${item.price}" data-name="${item.name}" value="0" min="0" max="${MAX_QTY}" onchange="validateInput('${item.id}')">
-                        <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
-                    </div>
-                </div>
-            `;
-        });
-        sectionHTML += `</div>`;
-        storeContainer.innerHTML += sectionHTML;
+    // 初始化畫布大小
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
+    window.addEventListener('resize', resize);
+    resize();
 
-    // 按鈕加減數量的邏輯
-    function updateQuantity(inputId, change) {
-        const input = document.getElementById(inputId);
-        let currentValue = parseInt(input.value) || 0;
-        let newValue = currentValue + change;
-        
-        if (newValue > MAX_QTY) {
-            newValue = MAX_QTY;
-            alert(`一個商品最多只能下單 ${MAX_QTY} 個！`);
-        } else if (newValue < 0) {
-            newValue = 0;
-        }
-        
-        input.value = newValue;
-        calculateTotal();
-    }
-
-    // 手動輸入數字時的防呆驗證
-    function validateInput(inputId) {
-        const input = document.getElementById(inputId);
-        let value = parseInt(input.value) || 0;
-        
-        if (value > MAX_QTY) {
-            input.value = MAX_QTY;
-            alert(`一個商品最多只能下單 ${MAX_QTY} 個！`);
-        } else if (value < 0) {
-            input.value = 0;
-        } else {
-            input.value = value;
-        }
-        calculateTotal();
-    }
-
-    // 計算總金額
-    function calculateTotal() {
-        let total = 0;
-        const inputs = document.querySelectorAll('input[type="number"]');
-        inputs.forEach(input => {
-            let qty = parseInt(input.value) || 0;
-            let price = parseInt(input.getAttribute('data-price'));
-            total += qty * price;
-        });
-        document.getElementById('total-amount').innerText = total;
-    }
-
-    // 卡號輸入格式化
-    document.getElementById('cc-number').addEventListener('input', function (e) {
-        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+    // 追蹤滑鼠
+    window.addEventListener('mousemove', (e) => {
+        player.x = e.clientX;
+        player.y = e.clientY;
     });
 
-    // 送出結帳 (切換畫面)
-    function checkout() {
-        const emailInput = document.getElementById('user-email').value;
-        const ccInput = document.getElementById('cc-number').value;
-
-        // 簡單的前端驗證
-        if (!emailInput.includes('@')) {
-            alert("請輸入有效的 Gmail 帳號！");
-            return;
+    // 障礙物類別
+    class Obstacle {
+        constructor() {
+            this.radius = Math.random() * 15 + 5;
+            this.reset();
         }
-        if (ccInput.length < 15) {
-            alert("請輸入完整的測試信用卡號碼！");
-            return;
-        }
-
-        let orderDetails = [];
-        const inputs = document.querySelectorAll('input[type="number"]');
-        let totalAmount = document.getElementById('total-amount').innerText;
-
-        inputs.forEach(input => {
-            let qty = parseInt(input.value) || 0;
-            if (qty > 0) {
-                orderDetails.push({
-                    name: input.getAttribute('data-name'),
-                    price: input.getAttribute('data-price'),
-                    quantity: qty
-                });
+        reset() {
+            // 從畫面邊緣生成
+            const side = Math.floor(Math.random() * 4);
+            if (side === 0) { // Top
+                this.x = Math.random() * canvas.width;
+                this.y = -this.radius;
+            } else if (side === 1) { // Right
+                this.x = canvas.width + this.radius;
+                this.y = Math.random() * canvas.height;
+            } else if (side === 2) { // Bottom
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + this.radius;
+            } else { // Left
+                this.x = -this.radius;
+                this.y = Math.random() * canvas.height;
             }
-        });
-
-        if (orderDetails.length === 0) {
-            alert("購物車是空的，請先選擇商品！");
-            return;
+            // 隨時間增加速度
+            let speedMult = 1 + (180 - timeLeft) / 30; 
+            this.vx = (Math.random() - 0.5) * 4 * speedMult;
+            this.vy = (Math.random() - 0.5) * 4 * speedMult;
         }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
 
-        // 產生收據明細 HTML
-        let receiptHTML = `
-            <p><strong>綁定帳號：</strong> ${emailInput}</p>
-            <p><strong>付款卡號：</strong> **** **** **** ${ccInput.slice(-4)}</p>
-            <ul>
-        `;
-        
-        orderDetails.forEach(item => {
-            receiptHTML += `
-                <li>
-                    <span>${item.name} x ${item.quantity}</span>
-                    <span>NT$ ${item.price * item.quantity}</span>
-                </li>
-            `;
+            // 超出邊界重置
+            if (this.x < -50 || this.x > canvas.width + 50 || 
+                this.y < -50 || this.y > canvas.height + 50) {
+                this.reset();
+            }
+
+            // 碰撞檢測
+            const dx = this.x - player.x;
+            const dy = this.y - player.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < this.radius + player.radius) {
+                gameOver();
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff4757';
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
+    // 初始化障礙物
+    for (let i = 0; i < 40; i++) {
+        particles.push(new Obstacle());
+    }
+
+    // 倒數計時器
+    const timerInterval = setInterval(() => {
+        if (gameActive) {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                winGame();
+            }
+        }
+    }, 1000);
+
+    function gameOver() {
+        alert("被撞到了！再試一次。");
+        location.reload();
+    }
+
+    function winGame() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        winOverlay.style.display = 'flex';
+        document.body.style.cursor = 'default';
+    }
+
+    function animate() {
+        if (!gameActive) return;
+        ctx.fillStyle = 'rgba(26, 26, 26, 0.3)'; // 拖尾效果
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 畫玩家
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#1e90ff';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#1e90ff';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.closePath();
+
+        // 更新並畫障礙物
+        particles.forEach(p => {
+            p.update();
+            p.draw();
         });
 
-        receiptHTML += `
-            </ul>
-            <h3 style="text-align: right; color: #d35400;">總計: NT$ ${totalAmount}</h3>
-            <p style="font-size: 0.8em; color: #7f8c8d; text-align: center;">本公司不負責任和使用本網站購物之風險 (如：帳號封禁、信用卡盜刷...等)</p>
-        `;
-
-        // 將明細塞入成功畫面
-        document.getElementById('receipt-content').innerHTML = receiptHTML;
-
-        // 切換畫面：隱藏商城，顯示成功畫面
-        document.getElementById('store-screen').style.display = 'none';
-        document.getElementById('success-screen').style.display = 'block';
-        
-        // 將畫面捲動到最上方
-        window.scrollTo(0, 0);
+        requestAnimationFrame(animate);
     }
 
-    // 返回商城並清空購物車
-    function returnToStore() {
-        // 清空所有欄位
-        const inputs = document.querySelectorAll('input[type="number"]');
-        inputs.forEach(input => input.value = 0);
-        document.getElementById('user-email').value = '';
-        document.getElementById('cc-number').value = '';
-        calculateTotal();
-
-        // 切換畫面：隱藏成功畫面，顯示商城
-        document.getElementById('success-screen').style.display = 'none';
-        document.getElementById('store-screen').style.display = 'block';
-        
-        // 將畫面捲動到最上方
-        window.scrollTo(0, 0);
-    }
+    animate();
 </script>
 
 </body>
