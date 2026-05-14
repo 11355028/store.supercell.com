@@ -44,7 +44,7 @@
 </head>
 <body>
 
-<div id="ui">剩餘時間: <span id="timer">180</span>s</div>
+<div id="ui">剩餘時間: <span id="timer">50</span>s</div>
 <canvas id="gameCanvas"></canvas>
 
 <div id="winOverlay">
@@ -58,7 +58,7 @@
     const winOverlay = document.getElementById('winOverlay');
 
     let gameActive = true;
-    let timeLeft = 180;
+    let timeLeft = 50;
     let particles = [];
     let player = { x: 0, y: 0, radius: 10 };
 
@@ -99,7 +99,7 @@
                 this.y = Math.random() * canvas.height;
             }
             // 隨時間增加速度
-            let speedMult = 1 + (180 - timeLeft) / 30; 
+            let speedMult = 1 + (50 - timeLeft) / 30; 
             this.vx = (Math.random() - 0.5) * 4 * speedMult;
             this.vy = (Math.random() - 0.5) * 4 * speedMult;
         }
